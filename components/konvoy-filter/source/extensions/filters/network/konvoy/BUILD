@@ -33,6 +33,7 @@ envoy_cc_library(
     repository = "@envoy",
     deps = [
         ":konvoy",
+        "//source/extensions/filters/common/konvoy:utility_lib",
         "@envoy//include/envoy/registry",
         "@envoy//source/extensions/filters/network:well_known_names",
         "@envoy//source/extensions/filters/network/common:factory_base_lib",

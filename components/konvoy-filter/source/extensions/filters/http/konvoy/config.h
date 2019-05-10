@@ -3,6 +3,7 @@
 #include "envoy/config/filter/http/konvoy/v2alpha/konvoy.pb.h"
 #include "envoy/config/filter/http/konvoy/v2alpha/konvoy.pb.validate.h"
 
+#include "extensions/filters/common/konvoy/anonymous_reporter.h"
 #include "extensions/filters/http/common/factory_base.h"
 #include "extensions/filters/http/well_known_names.h"
 
@@ -14,15 +15,18 @@ namespace Konvoy {
 /**
  * Config registration for the Konvoy filter. @see NamedHttpFilterConfigFactory.
  */
-class KonvoyFilterConfigFactory : public Common::FactoryBase<envoy::config::filter::http::konvoy::v2alpha::Konvoy,
-                                                      envoy::config::filter::http::konvoy::v2alpha::Konvoy> {
+class KonvoyFilterConfigFactory
+    : public Common::FactoryBase<envoy::config::filter::http::konvoy::v2alpha::Konvoy,
+                                 envoy::config::filter::http::konvoy::v2alpha::Konvoy> {
 public:
-    KonvoyFilterConfigFactory() : FactoryBase("konvoy") {}
+  KonvoyFilterConfigFactory() : FactoryBase("konvoy") {}
 
 private:
-    Http::FilterFactoryCb createFilterFactoryFromProtoTyped(
-            const envoy::config::filter::http::konvoy::v2alpha::Konvoy& proto_config,
-            const std::string& stats_prefix, Server::Configuration::FactoryContext& context) override;
+  Http::FilterFactoryCb createFilterFactoryFromProtoTyped(
+      const envoy::config::filter::http::konvoy::v2alpha::Konvoy& proto_config,
+      const std::string& stats_prefix, Server::Configuration::FactoryContext& context) override;
+
+  Filters::Common::Konvoy::AnonymousReporterSharedPtr anonymous_reporter_{};
 };
 
 } // namespace Konvoy

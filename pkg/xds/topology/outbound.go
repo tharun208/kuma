@@ -2,6 +2,7 @@ package topology
 
 import (
 	"context"
+	"github.com/Kong/kuma/pkg/core"
 	"net"
 
 	mesh_proto "github.com/Kong/kuma/api/mesh/v1alpha1"
@@ -14,6 +15,10 @@ func GetOutboundTargets(ctx context.Context, dataplane *mesh_core.DataplaneResou
 	outbound := make(map[string][]net.SRV)
 	if len(dataplane.Spec.Networking.GetOutbound()) > 0 {
 		dataplanes := &mesh_core.DataplaneResourceList{}
+		core.Log.Info("ASDFASDF", "dp", dataplane)
+		if manager == nil {
+			panic("WHAT THE F?")
+		}
 		if err := manager.List(ctx, dataplanes, core_store.ListByMesh(dataplane.Meta.GetMesh())); err != nil {
 			return nil, err
 		}

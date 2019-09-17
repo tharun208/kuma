@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"github.com/Kong/kuma/pkg/core/resources/manager"
 	"time"
 
 	"github.com/Kong/kuma/pkg/core/permissions"
@@ -26,7 +27,7 @@ func DefaultReconciler(rt core_runtime.Runtime) SnapshotReconciler {
 	return &reconciler{
 		&templateSnapshotGenerator{
 			ProxyTemplateResolver: &simpleProxyTemplateResolver{
-				ResourceManager:      rt.ResourceManager(),
+				ResourceManager:      manager.NewCachedManager(rt.ResourceManager(), 5*time.Second),
 				DefaultProxyTemplate: xds_template.DefaultProxyTemplate,
 			},
 		},
@@ -35,7 +36,7 @@ func DefaultReconciler(rt core_runtime.Runtime) SnapshotReconciler {
 }
 
 func DefaultDataplaneSyncTracker(rt core_runtime.Runtime, reconciler SnapshotReconciler) (envoy_xds.Callbacks, error) {
-	permissionsMatcher := permissions.TrafficPermissionsMatcher{ResourceManager: rt.ResourceManager()}
+	permissionsMatcher := permissions.TrafficPermissionsMatcher{ResourceManager: rt.CachedResourceManager()}
 	envoyCpCtx, err := xds_context.BuildControlPlaneContext(rt.Config())
 	if err != nil {
 		return nil, err
@@ -51,7 +52,7 @@ func DefaultDataplaneSyncTracker(rt core_runtime.Runtime, reconciler SnapshotRec
 				dataplane := &mesh_core.DataplaneResource{}
 				proxyID := xds.FromResourceKey(key)
 
-				if err := rt.ResourceManager().Get(ctx, dataplane, core_store.GetBy(key)); err != nil {
+				if err := rt.CachedResourceManager().Get(ctx, dataplane, core_store.GetBy(key)); err != nil {
 					if core_store.IsResourceNotFound(err) {
 						return reconciler.Clear(&proxyID)
 					}
@@ -59,7 +60,7 @@ func DefaultDataplaneSyncTracker(rt core_runtime.Runtime, reconciler SnapshotRec
 				}
 
 				meshList := mesh_core.MeshResourceList{}
-				if err := rt.ResourceManager().List(ctx, &meshList, core_store.ListByMesh(proxyID.Mesh)); err != nil {
+				if err := rt.CachedResourceManager().List(ctx, &meshList, core_store.ListByMesh(proxyID.Mesh)); err != nil {
 					return err
 				}
 				if len(meshList.Items) != 1 {
@@ -74,7 +75,7 @@ func DefaultDataplaneSyncTracker(rt core_runtime.Runtime, reconciler SnapshotRec
 					},
 				}
 
-				outbound, err := xds_topology.GetOutboundTargets(ctx, dataplane, rt.ResourceManager())
+				outbound, err := xds_topology.GetOutboundTargets(ctx, dataplane, rt.CachedResourceManager())
 				if err != nil {
 					return err
 				}

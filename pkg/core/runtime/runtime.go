@@ -27,6 +27,7 @@ type RuntimeContext interface {
 	DiscoverySources() []core_discovery.DiscoverySource
 	XDS() core_xds.XdsContext
 	ResourceManager() core_manager.ResourceManager
+	CachedResourceManager() core_manager.ResourceManager
 	SecretManager() secret_manager.SecretManager
 	BuiltinCaManager() builtin_ca.BuiltinCaManager
 	Extensions() context.Context
@@ -55,6 +56,7 @@ var _ RuntimeContext = &runtimeContext{}
 type runtimeContext struct {
 	cfg kuma_cp.Config
 	rm  core_manager.ResourceManager
+	crm core_manager.ResourceManager
 	sm  secret_manager.SecretManager
 	bcm builtin_ca.BuiltinCaManager
 	dss []core_discovery.DiscoverySource
@@ -73,6 +75,9 @@ func (rc *runtimeContext) XDS() core_xds.XdsContext {
 }
 func (rc *runtimeContext) ResourceManager() core_manager.ResourceManager {
 	return rc.rm
+}
+func (rc *runtimeContext) CachedResourceManager() core_manager.ResourceManager {
+	return rc.crm
 }
 func (rc *runtimeContext) SecretManager() secret_manager.SecretManager {
 	return rc.sm

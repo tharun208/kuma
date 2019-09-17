@@ -1,6 +1,7 @@
 package store
 
 import (
+	"fmt"
 	"github.com/Kong/kuma/pkg/core/resources/model"
 )
 
@@ -74,9 +75,13 @@ func DeleteByKey(ns, name, mesh string) DeleteOptionsFunc {
 }
 
 type GetOptions struct {
-	Namespace string
-	Name      string
-	Mesh      string
+	Namespace string `json:"namespace"`
+	Name      string `json:"name"`
+	Mesh      string `json:"mesh"`
+}
+
+func (g *GetOptions) HashCode() string {
+	return fmt.Sprintf("%s:%s:%s", g.Name, g.Namespace, g.Mesh)
 }
 
 type GetOptionsFunc func(*GetOptions)
@@ -102,8 +107,12 @@ func GetByKey(ns, name, mesh string) GetOptionsFunc {
 }
 
 type ListOptions struct {
-	Namespace string
-	Mesh      string
+	Namespace string `json:"namespace"`
+	Mesh      string `json:"mesh"`
+}
+
+func (l *ListOptions) HashCode() string {
+	return fmt.Sprintf("%s:%s", l.Mesh, l.Namespace)
 }
 
 type ListOptionsFunc func(*ListOptions)

@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"context"
+	"time"
 
 	kuma_cp "github.com/Kong/kuma/pkg/config/app/kuma-cp"
 	"github.com/Kong/kuma/pkg/core"
@@ -108,6 +109,7 @@ func (b *Builder) Build() (Runtime, error) {
 	if b.ext == nil {
 		return nil, errors.Errorf("Extensions have been misconfigured")
 	}
+	cached := core_manager.NewCachedManager(b.rm, 5*time.Second)
 	return &runtime{
 		RuntimeInfo: &runtimeInfo{
 			instanceId: core.NewUUID(),
@@ -115,6 +117,7 @@ func (b *Builder) Build() (Runtime, error) {
 		RuntimeContext: &runtimeContext{
 			cfg: b.cfg,
 			rm:  b.rm,
+			crm: cached,
 			sm:  b.sm,
 			bcm: b.bcm,
 			dss: b.dss,

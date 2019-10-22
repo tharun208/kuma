@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/Kong/kuma/pkg/core/resources/manager"
+	restfulspec "github.com/emicklei/go-restful-openapi"
+	"github.com/go-openapi/spec"
 	"net/http"
 
 	"github.com/Kong/kuma/pkg/api-server/definitions"
@@ -42,6 +44,7 @@ func NewApiServer(resManager manager.ResourceManager, defs []definitions.Resourc
 	container.Add(ws)
 	container.Add(indexWs())
 
+	configureOpenApi(container, ws, defs)
 	return &ApiServer{
 		server: srv,
 	}
@@ -58,9 +61,36 @@ func addToWs(ws *restful.WebService, defs []definitions.ResourceWsDefinition, re
 			resManager:           resManager,
 			readOnly:             config.ReadOnly,
 			ResourceWsDefinition: definition,
+			sample:               definition.Sample,
+			sampleList:           definition.SampleList,
 		}
 		resourceWs.AddToWs(ws)
 	}
+}
+
+func configureOpenApi(container *restful.Container, webService *restful.WebService, wsDefinitions []definitions.ResourceWsDefinition) {
+	openApiConfig := restfulspec.Config{
+		WebServices: []*restful.WebService{webService},
+		APIPath:     "/apidocs.json",
+		PostBuildSwaggerObjectHandler: func(s *spec.Swagger) {
+			for _, def := range wsDefinitions {
+				if def.Name == "Dataplane" {
+					sdef := s.Definitions["definitions.dataplaneRestResource"]
+					sdef.Example = def.Sample
+					s.Definitions["definitions.dataplaneRestResource"] = sdef
+				}
+				//if def.Name == "Mesh" {
+				//	sdef := s.Definitions["definitions.meshRestResource"]
+				//	sdef.Example = def.Sample
+				//	s.Definitions["definitions.meshRestResource"] = sdef
+				//}
+			}
+		},
+	}
+	container.Add(restfulspec.NewOpenAPIService(openApiConfig))
+
+	// todo(jakubdyszkiewicz) figure out how to pack swagger ui dist package and expose swagger ui
+	//container.Handle("/apidocs/", http.StripPrefix("/apidocs/", http.FileServer(http.Dir("path/to/swagger-ui-dist"))))
 }
 
 func (a *ApiServer) Start(stop <-chan struct{}) error {

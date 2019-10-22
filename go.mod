@@ -17,6 +17,7 @@ require (
 	github.com/go-logr/glogr v0.1.0 // indirect
 	github.com/go-logr/logr v0.1.0
 	github.com/go-logr/zapr v0.1.0
+	github.com/go-openapi/spec v0.0.0-20180415031709-bcff419492ee
 	github.com/gogo/googleapis v1.2.0
 	github.com/gogo/protobuf v1.2.2-0.20190730201129-28a6bbf47e48
 	github.com/golang/protobuf v1.3.2

@@ -12,13 +12,13 @@ type from struct{}
 func (c *from) Resource(r model.Resource) *Resource {
 	var meshName string
 	if r.GetType() != mesh.MeshType {
-		meshName = r.GetMeta().GetMesh()
+		meshName = "" //r.GetMeta().GetMesh()
 	}
 	return &Resource{
 		Meta: ResourceMeta{
 			Mesh: meshName,
 			Type: string(r.GetType()),
-			Name: r.GetMeta().GetName(),
+			//Name: r.GetMeta().GetName(),
 		},
 		Spec: r.GetSpec(),
 	}

@@ -19,6 +19,8 @@ const namespace = "default"
 type resourceWs struct {
 	resManager      manager.ResourceManager
 	readOnly        bool
+	sample          interface{}
+	sampleList      interface{}
 	nameFromRequest func(*restful.Request) string
 	meshFromRequest func(*restful.Request) string
 	definitions.ResourceWsDefinition
@@ -43,23 +45,29 @@ func (r *resourceWs) AddToWs(ws *restful.WebService) {
 		}
 	}
 
+	if r.sample == nil {
+		r.sample = struct {
+		}{}
+	}
+	if r.sampleList == nil {
+		r.sampleList = struct {
+		}{}
+	}
 	ws.Route(ws.GET(pathPrefix+"/{name}").To(r.findResource).
 		Doc(fmt.Sprintf("Get a %s", r.Name)).
 		Param(ws.PathParameter("name", fmt.Sprintf("Name of a %s", r.Name)).DataType("string")).
-		//Writes(r.SpecFactory()).
-		Returns(200, "OK", nil). // todo(jakubdyszkiewicz) figure out how to expose the doc for ResourceReqResp
+		Returns(200, "OK", r.sample).
 		Returns(404, "Not found", nil))
 
 	ws.Route(ws.GET(pathPrefix).To(r.listResources).
 		Doc(fmt.Sprintf("List of %s", r.Name)).
-		//Writes(r.SampleListSpec).
-		Returns(200, "OK", nil)) // todo(jakubdyszkiewicz) figure out how to expose the doc for ResourceReqResp
+		Returns(200, "OK", r.sampleList))
 
 	if !r.readOnly {
 		ws.Route(ws.PUT(pathPrefix+"/{name}").To(r.createOrUpdateResource).
 			Doc(fmt.Sprintf("Updates a %s", r.Name)).
 			Param(ws.PathParameter("name", fmt.Sprintf("Name of the %s", r.Name)).DataType("string")).
-			//Reads(r.SampleSpec). // todo(jakubdyszkiewicz) figure out how to expose the doc for ResourceReqResp
+			Reads(r.sample).
 			Returns(200, "OK", nil).
 			Returns(201, "Created", nil))
 

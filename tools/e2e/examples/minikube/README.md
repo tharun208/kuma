@@ -14,35 +14,35 @@ Kuma Control Plane inside Minikube
 minikube start
 ```
 
-### Build Control Plane image
+### Build Control Plane images
 
 ```bash
-make build/example/minikube -C ../.. -f Makefile.e2e.mk
+make build/example/minikube -C ../../../.. -f Makefile.e2e.mk
 ```
 
 ### Deploy demo setup into Minikube
 
 ```bash
-make deploy/example/minikube -C ../.. -f Makefile.e2e.mk
+make deploy/example/minikube -C ../../../.. -f Makefile.e2e.mk
 ```
 
 ### Make test requests
 
 ```bash
-make wait/example/minikube -C ../.. -f Makefile.e2e.mk
-make curl/example/minikube -C ../.. -f Makefile.e2e.mk
+make wait/example/minikube -C ../../../.. -f Makefile.e2e.mk
+make curl/example/minikube -C ../../../.. -f Makefile.e2e.mk
 ```
 
 ### Verify Envoy stats
 
 ```bash
-make verify/example/minikube -C ../.. -f Makefile.e2e.mk
+make verify/example/minikube -C ../../../.. -f Makefile.e2e.mk
 ```
 
 ### Observe Envoy stats
 
 ```bash
-make stats/example/minikube -C ../.. -f Makefile.e2e.mk
+make stats/example/minikube -C ../../../.. -f Makefile.e2e.mk
 ```
 
 E.g.,
@@ -61,29 +61,29 @@ where
 ### Enable mTLS
 
 ```bash
-make apply/example/minikube/mtls -C ../.. -f Makefile.e2e.mk
+make apply/example/minikube/mtls -C ../../../.. -f Makefile.e2e.mk
 ```
 
 ### Wait until Envoy is configured for mTLS
 
 ```bash
-make wait/example/minikube/mtls -C ../.. -f Makefile.e2e.mk
+make wait/example/minikube/mtls -C ../../../.. -f Makefile.e2e.mk
 ```
 
 ### Make test requests via Envoy with mTLS
 
 ```bash
-make curl/example/minikube -C ../.. -f Makefile.e2e.mk
+make curl/example/minikube -C ../../../.. -f Makefile.e2e.mk
 ```
 
 ### Verify Envoy mTLS stats
 
 ```bash
-make verify/example/minikube/mtls -C ../.. -f Makefile.e2e.mk
+make verify/example/minikube/mtls -C ../../../.. -f Makefile.e2e.mk
 ```
 
 ### Verify kumactl workflow
 
 ```bash
-make kumactl/example/minikube -C ../.. -f Makefile.e2e.mk
+make kumactl/example/minikube -C ../../../.. -f Makefile.e2e.mk
 ```

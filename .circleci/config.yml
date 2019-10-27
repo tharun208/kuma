@@ -397,43 +397,43 @@ jobs:
         at: build
     - run:
         name: Install Minikube
-        command: make dev/install/minikube
+        command: make -f Makefile.e2e.mk dev/install/minikube
     - run:
         name: Install Kubectl
-        command: make dev/install/kubectl
+        command: make -f Makefile.e2e.mk dev/install/kubectl
     - run:
         name: Start Minikube
         command: sudo CHANGE_MINIKUBE_NONE_USER=true $HOME/bin/minikube start --vm-driver=none --kubernetes-version=<< parameters.kubernetes_version >>
     - run:
         name: Load Docker images into Minikube
-        command: make load/example/minikube
+        command: make -f Makefile.e2e.mk load/example/minikube
     - run:
         name: Deploy Kuma demo
-        command: make deploy/example/minikube KUMACTL_INSTALL_USE_LOCAL_IMAGES=<< parameters.use_local_kuma_images >>
+        command: make -f Makefile.e2e.mk deploy/example/minikube KUMACTL_INSTALL_USE_LOCAL_IMAGES=<< parameters.use_local_kuma_images >>
     - run:
         name: Wait until Envoy listener gets configured
-        command: make wait/example/minikube
+        command: make -f Makefile.e2e.mk wait/example/minikube
     - run:
         name: Make test requests via Envoy
-        command: make curl/example/minikube
+        command: make -f Makefile.e2e.mk curl/example/minikube
     - run:
         name: Verify Envoy stats
-        command: make verify/example/minikube
+        command: make -f Makefile.e2e.mk verify/example/minikube
     - run:
         name: Enable mTLS
-        command: make apply/example/minikube/mtls
+        command: make -f Makefile.e2e.mk apply/example/minikube/mtls
     - run:
         name: Wait until Envoy is configured for mTLS
-        command: make wait/example/minikube/mtls
+        command: make -f Makefile.e2e.mk wait/example/minikube/mtls
     - run:
         name: Make test requests via Envoy with mTLS
-        command: make curl/example/minikube
+        command: make -f Makefile.e2e.mk curl/example/minikube
     - run:
         name: Verify Envoy mTLS stats
-        command: make verify/example/minikube/mtls
+        command: make -f Makefile.e2e.mk verify/example/minikube/mtls
     - run:
         name: Verify kumactl workflow
-        command: make kumactl/example/minikube
+        command: make -f Makefile.e2e.mk kumactl/example/minikube
 
   release:
     executor: golang

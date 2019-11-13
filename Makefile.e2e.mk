@@ -160,33 +160,33 @@ deploy/example/minikube: ## Minikube: Deploy example setup
 	eval $$(minikube docker-env) && docker run --rm $(KUMACTL_DOCKER_IMAGE) kumactl install control-plane $(KUMACTL_INSTALL_CONTROL_PLANE_IMAGES) | kubectl apply -f -
 	kubectl wait --timeout=60s --for=condition=Available -n kuma-system deployment/kuma-injector
 	kubectl wait --timeout=60s --for=condition=Ready -n kuma-system pods -l app=kuma-injector
-	kubectl apply -f tools/e2e/examples/minikube/kuma-demo/
-	kubectl wait --timeout=60s --for=condition=Available -n kuma-demo deployment/demo-app
-	kubectl wait --timeout=60s --for=condition=Ready -n kuma-demo pods -l app=demo-app
-	kubectl wait --timeout=60s --for=condition=Available -n kuma-demo deployment/demo-client
-	kubectl wait --timeout=60s --for=condition=Ready -n kuma-demo pods -l app=demo-client
+	kubectl apply -f tools/e2e/examples/minikube/kuma-example/
+	kubectl wait --timeout=60s --for=condition=Available -n kuma-example deployment/example-app
+	kubectl wait --timeout=60s --for=condition=Ready -n kuma-example pods -l app=example-app
+	kubectl wait --timeout=60s --for=condition=Available -n kuma-example deployment/example-client
+	kubectl wait --timeout=60s --for=condition=Ready -n kuma-example pods -l app=example-client
 
 apply/example/minikube/mtls: ## Minikube: enable mTLS
 	kubectl apply -f tools/e2e/examples/minikube/policies/mtls.yaml
 
-wait/example/minikube: ## Minikube: Wait for demo setup to get ready
-	kubectl -n kuma-demo exec -ti $$( kubectl -n kuma-demo get pods -l app=demo-client -o=jsonpath='{.items[0].metadata.name}' ) -c demo-client -- $(call wait_for_example_client)
+wait/example/minikube: ## Minikube: Wait for example setup to get ready
+	kubectl -n kuma-example exec -ti $$( kubectl -n kuma-example get pods -l app=example-client -o=jsonpath='{.items[0].metadata.name}' ) -c example-client -- $(call wait_for_example_client)
 
 wait/example/minikube/mtls: ## Minikube: Wait until incoming Listener and outgoing Cluster have been configured for mTLS
-	kubectl -n kuma-demo exec -ti $$( kubectl -n kuma-demo get pods -l app=demo-client -o=jsonpath='{.items[0].metadata.name}' ) -c demo-client -- sh -c 'for i in `seq 1 10`; do echo -n "try #$$i: " ; if [[ $$( $(call envoy_active_mtls_listeners_count,inbound,3000) ) -eq 1 ]]; then echo "listener has been configured for mTLS "; exit 0; fi; sleep 1; done; echo -e "\nError: listener has not been configured for mTLS" ; exit 1'
-	kubectl -n kuma-demo exec -ti $$( kubectl -n kuma-demo get pods -l app=demo-client -o=jsonpath='{.items[0].metadata.name}' ) -c demo-client -- sh -c 'for i in `seq 1 10`; do echo -n "try #$$i: " ; if [[ $$( $(call envoy_active_mtls_clusters_count,demo-app.kuma-demo.svc:8000) ) -eq 1 ]]; then echo "cluster has been configured for mTLS "; exit 0; fi; sleep 1; done; echo -e "\nError: cluster has not been configured for mTLS" ; exit 1'
+	kubectl -n kuma-example exec -ti $$( kubectl -n kuma-example get pods -l app=example-client -o=jsonpath='{.items[0].metadata.name}' ) -c example-client -- sh -c 'for i in `seq 1 10`; do echo -n "try #$$i: " ; if [[ $$( $(call envoy_active_mtls_listeners_count,inbound,3000) ) -eq 1 ]]; then echo "listener has been configured for mTLS "; exit 0; fi; sleep 1; done; echo -e "\nError: listener has not been configured for mTLS" ; exit 1'
+	kubectl -n kuma-example exec -ti $$( kubectl -n kuma-example get pods -l app=example-client -o=jsonpath='{.items[0].metadata.name}' ) -c example-client -- sh -c 'for i in `seq 1 10`; do echo -n "try #$$i: " ; if [[ $$( $(call envoy_active_mtls_clusters_count,example-app.kuma-example.svc:8000) ) -eq 1 ]]; then echo "cluster has been configured for mTLS "; exit 0; fi; sleep 1; done; echo -e "\nError: cluster has not been configured for mTLS" ; exit 1'
 
-curl/example/minikube: ## Minikube: Make sample requests to demo setup
-	kubectl -n kuma-demo exec -ti $$( kubectl -n kuma-demo get pods -l app=demo-client -o=jsonpath='{.items[0].metadata.name}' ) -c demo-client -- $(call curl_example_client)
+curl/example/minikube: ## Minikube: Make sample requests to example setup
+	kubectl -n kuma-example exec -ti $$( kubectl -n kuma-example get pods -l app=example-client -o=jsonpath='{.items[0].metadata.name}' ) -c example-client -- $(call curl_example_client)
 
-stats/example/minikube: ## Minikube: Observe Envoy metrics from demo setup
-	kubectl -n kuma-demo exec $$(kubectl -n kuma-demo get pods -l app=demo-app -o=jsonpath='{.items[0].metadata.name}') -c kuma-sidecar -- wget -qO- http://localhost:9901/stats/prometheus | grep upstream_rq_total
+stats/example/minikube: ## Minikube: Observe Envoy metrics from example setup
+	kubectl -n kuma-example exec $$(kubectl -n kuma-example get pods -l app=example-app -o=jsonpath='{.items[0].metadata.name}') -c kuma-sidecar -- wget -qO- http://localhost:9901/stats/prometheus | grep upstream_rq_total
 
 verify/example/minikube/inbound:
-	$(call verify_example_inbound,kubectl -n kuma-demo exec $$(kubectl -n kuma-demo get pods -l app=demo-app -o=jsonpath='{.items[0].metadata.name}') -c kuma-sidecar -- )
+	$(call verify_example_inbound,kubectl -n kuma-example exec $$(kubectl -n kuma-example get pods -l app=example-app -o=jsonpath='{.items[0].metadata.name}') -c kuma-sidecar -- )
 
 verify/example/minikube/outbound:
-	$(call verify_example_outbound,kubectl -n kuma-demo exec $$(kubectl -n kuma-demo get pods -l app=demo-app -o=jsonpath='{.items[0].metadata.name}') -c kuma-sidecar -- )
+	$(call verify_example_outbound,kubectl -n kuma-example exec $$(kubectl -n kuma-example get pods -l app=example-app -o=jsonpath='{.items[0].metadata.name}') -c kuma-sidecar -- )
 
 verify/example/minikube: verify/example/minikube/inbound verify/example/minikube/outbound ## Minikube: Verify Envoy stats (after sample requests)
 
@@ -194,7 +194,7 @@ verify/example/minikube/mtls: verify/example/minikube/mtls/outbound ## Minikube:
 
 verify/example/minikube/mtls/outbound:
 	@echo "Checking number of Outbound mTLS requests via Envoy ..."
-	test $$( kubectl -n kuma-demo exec $$(kubectl -n kuma-demo get pods -l app=demo-client -o=jsonpath='{.items[0].metadata.name}') -c kuma-sidecar -- wget -qO- http://localhost:9901/stats/prometheus | grep 'envoy_cluster_kuma_demo_svc_8000_ssl_handshake{envoy_cluster_name="demo-app"}' | awk '{print $$2}' | tr -d [:space:] ) -ge 5
+	test $$( kubectl -n kuma-example exec $$(kubectl -n kuma-example get pods -l app=example-client -o=jsonpath='{.items[0].metadata.name}') -c kuma-sidecar -- wget -qO- http://localhost:9901/stats/prometheus | grep 'envoy_cluster_kuma_example_svc_8000_ssl_handshake{envoy_cluster_name="example-app"}' | awk '{print $$2}' | tr -d [:space:] ) -ge 5
 	@echo "Check passed!"
 
 kumactl/example/minikube:

@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: kuma-demo
+  name: kuma-example
   labels:
     kuma.io/sidecar-injection: enabled
 
@@ -10,8 +10,8 @@ metadata:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: demo-app-config
-  namespace: kuma-demo
+  name: example-app-config
+  namespace: kuma-example
 data:
   kong.yml: |
     _format_version: "1.1"
@@ -27,28 +27,28 @@ data:
 apiVersion: v1
 kind: Service
 metadata:
-  name: demo-app
-  namespace: kuma-demo
+  name: example-app
+  namespace: kuma-example
 spec:
   ports:
   - port: 8000
     name: http
   selector:
-    app: demo-app
+    app: example-app
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: demo-app-service-account
-  namespace: kuma-demo
+  name: example-app-service-account
+  namespace: kuma-example
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: demo-app
-  namespace: kuma-demo
+  name: example-app
+  namespace: kuma-example
   labels:
-    app: demo-app
+    app: example-app
 spec:
   strategy:
     rollingUpdate:
@@ -56,15 +56,15 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: demo-app
+      app: example-app
   template:
     metadata:
       labels:
-        app: demo-app
+        app: example-app
     spec:
-      serviceAccountName: demo-app-service-account
+      serviceAccountName: example-app-service-account
       containers:
-      - name: demo-app
+      - name: example-app
         image: "kong:1.1.2-alpine"
         imagePullPolicy: IfNotPresent
         ports:
@@ -77,7 +77,7 @@ spec:
         - name: KONG_DECLARATIVE_CONFIG
           value: "/etc/kong/kong.yml"
         volumeMounts:
-        - name: demo-app-config
+        - name: example-app-config
           mountPath: /etc/kong
         livenessProbe:
           exec:
@@ -96,36 +96,36 @@ spec:
             cpu: 50m
             memory: 64Mi
       volumes:
-      - name: demo-app-config
+      - name: example-app-config
         configMap:
-          name: demo-app-config
+          name: example-app-config
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: demo-client
-  namespace: kuma-demo
+  name: example-client
+  namespace: kuma-example
 spec:
   ports:
   - port: 3000
     name: http
   selector:
-    app: demo-client
+    app: example-client
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: demo-client-service-account
-  namespace: kuma-demo
+  name: example-client-service-account
+  namespace: kuma-example
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: demo-client
-  namespace: kuma-demo
+  name: example-client
+  namespace: kuma-example
   labels:
-    app: demo-client
+    app: example-client
 spec:
   strategy:
     rollingUpdate:
@@ -133,15 +133,15 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: demo-client
+      app: example-client
   template:
     metadata:
       labels:
-        app: demo-client
+        app: example-client
     spec:
-      serviceAccountName: demo-client-service-account
+      serviceAccountName: example-client-service-account
       containers:
-      - name: demo-client
+      - name: example-client
         image: kong-docker-kuma-ci-docker.bintray.io/curl
         imagePullPolicy: IfNotPresent
         ports:
@@ -157,7 +157,7 @@ spec:
         - --show-error
         - --include
         - --fail
-        - http://demo-app.kuma-demo:8000/request
+        - http://example-app.kuma-example:8000/request
         resources:
           requests:
             cpu: 10m

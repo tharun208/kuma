@@ -18,15 +18,15 @@ require (
 	github.com/go-logr/logr v0.1.0
 	github.com/go-logr/zapr v0.1.0
 	github.com/gogo/protobuf v1.3.1
-	github.com/golang-migrate/migrate/v4 v4.8.0
+	github.com/golang-migrate/migrate/v4 v4.14.1
 	github.com/golang/protobuf v1.4.3
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/gruntwork-io/terratest v0.27.5
 	github.com/hoisie/mustache v0.0.0-20160804235033-6375acf62c69
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/kumahq/kuma/api v0.0.0-00010101000000-000000000000
-	github.com/kumahq/kuma/pkg/plugins/resources/k8s/native v0.0.0-00010101000000-000000000000
-	github.com/lib/pq v1.7.0
+	github.com/kumahq/kuma/api v0.0.0-00010101000000-000000000000 // indirect
+	github.com/kumahq/kuma/pkg/plugins/resources/k8s/native v0.0.0-00010101000000-000000000000 // indirect
+	github.com/lib/pq v1.8.0
 	github.com/miekg/dns v1.1.29
 	github.com/onsi/ginkgo v1.14.2
 	github.com/onsi/gomega v1.10.3
@@ -35,7 +35,7 @@ require (
 	github.com/prometheus/client_golang v1.7.1
 	github.com/prometheus/client_model v0.2.0
 	github.com/prometheus/common v0.10.0
-	github.com/prometheus/prometheus v0.0.0-00010101000000-000000000000
+	github.com/prometheus/prometheus v0.0.0-00010101000000-000000000000 // indirect
 	github.com/sethvargo/go-retry v0.1.0
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749
 	github.com/slok/go-http-metrics v0.9.0
@@ -44,10 +44,10 @@ require (
 	github.com/spiffe/spire v0.10.0
 	go.uber.org/multierr v1.3.0
 	go.uber.org/zap v1.13.0
-	golang.org/x/time v0.0.0-20191024005414-555d28b269f0
+	golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e
 	golang.org/x/tools v0.0.0-20201208233053-a543418bbed2 // indirect
-	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013
-	google.golang.org/grpc v1.30.0
+	google.golang.org/genproto v0.0.0-20201030142918-24207fddd1c3
+	google.golang.org/grpc v1.33.1
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/yaml.v2 v2.3.0
 	helm.sh/helm/v3 v3.3.4

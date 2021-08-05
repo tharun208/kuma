@@ -46,6 +46,7 @@ func (d *TrafficRouteResource) validateHTTP(pathBuilder validators.PathBuilder, 
 	err.Add(d.validateHTTPMatch(pathBuilder.Field("match"), http.GetMatch()))
 	err.Add(d.validateHTTPModify(pathBuilder.Field("modify"), http.GetModify(), http.GetMatch()))
 	err.Add(d.validateSplitAndDestination(pathBuilder, http.GetSplit(), http.GetDestination()))
+	err.Add(d.validateMirror(pathBuilder.Field("mirror"), http.GetMirror()))
 	return
 }
 
@@ -249,5 +250,14 @@ func (d *TrafficRouteResource) validateLb() (err validators.ValidationError) {
 			err.AddViolationAt(root, "must have a valid hash function")
 		}
 	}
+	return
+}
+
+func (d *TrafficRouteResource) validateMirror(pathBuilder validators.PathBuilder, mirror *mesh_proto.TrafficRoute_Mirror) (err validators.ValidationError) {
+	if mirror == nil {
+		return
+	}
+	err.Add(validatePercentage(pathBuilder, mirror.GetPercentage()))
+	err.Add(d.validateDestination(pathBuilder.Field("destination"), mirror.GetDestination()))
 	return
 }

@@ -81,6 +81,9 @@ func resolveTrafficRouteWildcards(routeRes *mesh_core.TrafficRouteResource, outb
 		if len(http.Destination) > 0 {
 			http.Destination = handleWildcardTagsFor(outboundTags, http.Destination)
 		}
+		if http.Mirror != nil && len(http.Mirror.Destination) > 0 {
+			http.Mirror.Destination = handleWildcardTagsFor(outboundTags, http.Mirror.Destination)
+		}
 		for _, split := range http.Split {
 			split.Destination = handleWildcardTagsFor(outboundTags, split.Destination)
 		}

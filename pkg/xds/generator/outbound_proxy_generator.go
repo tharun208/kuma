@@ -320,6 +320,7 @@ func (_ OutboundProxyGenerator) determineRoutes(proxy *model.Proxy, outbound *ku
 			Match:    http.Match,
 			Modify:   http.Modify,
 			Clusters: clustersFromSplit(http.GetSplitWithDestination()),
+			Mirror:   http.GetMirror(),
 		}
 		routes = append(routes, route)
 	}

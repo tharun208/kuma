@@ -1,6 +1,7 @@
 package v3
 
 import (
+	"math"
 	"sort"
 
 	envoy_config_core_v3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
@@ -30,7 +31,7 @@ func (c RoutesConfigurer) Configure(virtualHost *envoy_route.VirtualHost) error 
 		envoyRoute := &envoy_route.Route{
 			Match: c.routeMatch(route.Match),
 			Action: &envoy_route.Route_Route{
-				Route: c.routeAction(route.Clusters, route.Modify),
+				Route: c.routeAction(route.Clusters, route.Modify, route.Mirror),
 			},
 		}
 
@@ -167,7 +168,7 @@ func (c RoutesConfigurer) hasExternal(clusters []envoy_common.Cluster) bool {
 	return false
 }
 
-func (c RoutesConfigurer) routeAction(clusters []envoy_common.Cluster, modify *mesh_proto.TrafficRoute_Http_Modify) *envoy_route.RouteAction {
+func (c RoutesConfigurer) routeAction(clusters []envoy_common.Cluster, modify *mesh_proto.TrafficRoute_Http_Modify, mirror *mesh_proto.TrafficRoute_Mirror) *envoy_route.RouteAction {
 	routeAction := &envoy_route.RouteAction{}
 	if len(clusters) != 0 {
 		routeAction.Timeout = durationpb.New(clusters[0].Timeout().GetHttp().GetRequestTimeout().AsDuration())
@@ -199,6 +200,7 @@ func (c RoutesConfigurer) routeAction(clusters []envoy_common.Cluster, modify *m
 		}
 	}
 	c.setModifications(routeAction, modify)
+	c.setMirror(routeAction, clusters, mirror)
 	return routeAction
 }
 
@@ -239,6 +241,27 @@ func (c RoutesConfigurer) setModifications(routeAction *envoy_route.RouteAction,
 				},
 			}
 		}
+	}
+}
+
+func (c RoutesConfigurer) setMirror(routeAction *envoy_route.RouteAction, clusters []envoy_common.Cluster, mirror *mesh_proto.TrafficRoute_Mirror) {
+	if mirror != nil {
+		var mirrorClusters []*envoy_route.RouteAction_RequestMirrorPolicy
+
+		for _, cluster := range clusters {
+			if cluster.Service() == mirror.Destination[mesh_proto.ServiceTag] {
+				mirrorClusters = append(mirrorClusters, &envoy_route.RouteAction_RequestMirrorPolicy{
+					Cluster: cluster.Name(),
+					RuntimeFraction: &envoy_core.RuntimeFractionalPercent{
+						DefaultValue: convertPercentage(mirror.GetPercentage()),
+					},
+					TraceSampled: &wrapperspb.BoolValue{
+						Value: false,
+					},
+				})
+			}
+		}
+		routeAction.RequestMirrorPolicies = mirrorClusters
 	}
 }
 
@@ -303,4 +326,34 @@ func (c *RoutesConfigurer) createRateLimit(rlHttp *mesh_proto.RateLimit_Conf_Htt
 	}
 
 	return proto.MarshalAnyDeterministic(config)
+}
+
+func convertPercentage(percentage *wrapperspb.DoubleValue) *envoy_type_v3.FractionalPercent {
+	const tenThousand = 10000
+	const million = 1000000
+
+	isInteger := func(f float64) bool {
+		return math.Floor(f) == f
+	}
+
+	value := percentage.GetValue()
+	if isInteger(value) {
+		return &envoy_type_v3.FractionalPercent{
+			Numerator:   uint32(value),
+			Denominator: envoy_type_v3.FractionalPercent_HUNDRED,
+		}
+	}
+
+	tenThousandTimes := tenThousand * value
+	if isInteger(tenThousandTimes) {
+		return &envoy_type_v3.FractionalPercent{
+			Numerator:   uint32(tenThousandTimes),
+			Denominator: envoy_type_v3.FractionalPercent_TEN_THOUSAND,
+		}
+	}
+
+	return &envoy_type_v3.FractionalPercent{
+		Numerator:   uint32(math.Round(million * value)),
+		Denominator: envoy_type_v3.FractionalPercent_MILLION,
+	}
 }

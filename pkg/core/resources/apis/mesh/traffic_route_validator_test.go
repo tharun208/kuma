@@ -56,6 +56,23 @@ var _ = Describe("TrafficRoute", func() {
                   destination:
                     kuma.io/service: offers`,
 			),
+			Entry("example with mirror", `
+                sources:
+                - match:
+                    kuma.io/service: web
+                destinations:
+                - match:
+                    kuma.io/service: backend
+                conf:
+                  loadBalancer:
+                    leastRequest: {}
+                  destination:
+                    kuma.io/service: offers
+                  mirror:
+                    percentage: 60.0
+                    destination:
+                      kuma.io/service: offers`,
+			),
 			Entry("example with http", `
                 sources:
                 - match:

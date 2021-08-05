@@ -56,6 +56,25 @@ message TrafficRoute {
     } ];
   };
 
+  // Mirror defines a mirror destination with a percentage assigned to it.
+  message Mirror {
+
+    // Percentage of requests on which delay will be injected, has to be in
+    // [0.0 - 100.0] range
+    google.protobuf.DoubleValue percentage = 1;
+
+    // Selector to match individual endpoints that comprise that destination.
+    //
+    // Notice that an endpoint can be either inside or outside the mesh.
+    // In the former case an endpoint corresponds to a data plane proxy,
+    // in the latter case an endpoint is an External Service.
+    map<string, string> destination = 2 [ (validate.rules).map = {
+      min_pairs : 1,
+      keys : {string : {min_len : 1}},
+      values : {string : {min_len : 1}}
+    } ]; 
+  }
+
   // LoadBalancer defines the load balancing policy and configuration.
   message LoadBalancer {
 
@@ -220,6 +239,8 @@ message TrafficRoute {
     // One destination that the traffic will be redirected to.
     // When used, "split" is not allowed.
     map<string, string> destination = 4;
+    // Mirror configuration for given "split" or "destination".
+    Mirror mirror = 5;
   }
 
   // Configuration for the route.

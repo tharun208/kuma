@@ -121,6 +121,10 @@ func (_ IngressGenerator) destinations(trs *core_mesh.TrafficRouteResourceList) 
 				service := split.Destination[mesh_proto.ServiceTag]
 				destinations[service] = append(destinations[service], split.Destination)
 			}
+			if http.Mirror != nil && len(http.Mirror.Destination) > 0 {
+				service := http.Mirror.Destination[mesh_proto.ServiceTag]
+				destinations[service] = append(destinations[service], http.Mirror.Destination)
+			}
 		}
 	}
 	return destinations

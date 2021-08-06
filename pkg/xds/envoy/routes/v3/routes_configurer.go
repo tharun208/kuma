@@ -31,7 +31,7 @@ func (c RoutesConfigurer) Configure(virtualHost *envoy_route.VirtualHost) error 
 		envoyRoute := &envoy_route.Route{
 			Match: c.routeMatch(route.Match),
 			Action: &envoy_route.Route_Route{
-				Route: c.routeAction(route.Clusters, route.Modify, route.Mirror),
+				Route: c.routeAction(route.Clusters, route.Modify),
 			},
 		}
 
@@ -168,7 +168,7 @@ func (c RoutesConfigurer) hasExternal(clusters []envoy_common.Cluster) bool {
 	return false
 }
 
-func (c RoutesConfigurer) routeAction(clusters []envoy_common.Cluster, modify *mesh_proto.TrafficRoute_Http_Modify, mirror *mesh_proto.TrafficRoute_Mirror) *envoy_route.RouteAction {
+func (c RoutesConfigurer) routeAction(clusters []envoy_common.Cluster, modify *mesh_proto.TrafficRoute_Http_Modify) *envoy_route.RouteAction {
 	routeAction := &envoy_route.RouteAction{}
 	if len(clusters) != 0 {
 		routeAction.Timeout = durationpb.New(clusters[0].Timeout().GetHttp().GetRequestTimeout().AsDuration())
@@ -200,7 +200,7 @@ func (c RoutesConfigurer) routeAction(clusters []envoy_common.Cluster, modify *m
 		}
 	}
 	c.setModifications(routeAction, modify)
-	c.setMirror(routeAction, clusters, mirror)
+	c.setMirror(routeAction, clusters)
 	return routeAction
 }
 
@@ -244,25 +244,22 @@ func (c RoutesConfigurer) setModifications(routeAction *envoy_route.RouteAction,
 	}
 }
 
-func (c RoutesConfigurer) setMirror(routeAction *envoy_route.RouteAction, clusters []envoy_common.Cluster, mirror *mesh_proto.TrafficRoute_Mirror) {
-	if mirror != nil {
-		var mirrorClusters []*envoy_route.RouteAction_RequestMirrorPolicy
-
-		for _, cluster := range clusters {
-			if cluster.Service() == mirror.Destination[mesh_proto.ServiceTag] {
-				mirrorClusters = append(mirrorClusters, &envoy_route.RouteAction_RequestMirrorPolicy{
-					Cluster: cluster.Name(),
-					RuntimeFraction: &envoy_core.RuntimeFractionalPercent{
-						DefaultValue: convertPercentage(mirror.GetPercentage()),
-					},
-					TraceSampled: &wrapperspb.BoolValue{
-						Value: false,
-					},
-				})
-			}
+func (c RoutesConfigurer) setMirror(routeAction *envoy_route.RouteAction, clusters []envoy_common.Cluster) {
+	var mirrorClusters []*envoy_route.RouteAction_RequestMirrorPolicy
+	for _, cluster := range clusters {
+		if cluster.Shadow() == true {
+			mirrorClusters = append(mirrorClusters, &envoy_route.RouteAction_RequestMirrorPolicy{
+				Cluster: cluster.Name(),
+				RuntimeFraction: &envoy_core.RuntimeFractionalPercent{
+					DefaultValue: convertPercentage(cluster.Percentage()),
+				},
+				TraceSampled: &wrapperspb.BoolValue{
+					Value: false,
+				},
+			})
 		}
-		routeAction.RequestMirrorPolicies = mirrorClusters
 	}
+	routeAction.RequestMirrorPolicies = mirrorClusters
 }
 
 func (c *RoutesConfigurer) typedPerFilterConfig(route *envoy_common.Route) (map[string]*any.Any, error) {

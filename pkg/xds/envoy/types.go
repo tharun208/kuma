@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	mesh_proto "github.com/kumahq/kuma/api/mesh/v1alpha1"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	envoy_types "github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"github.com/pkg/errors"
@@ -19,6 +20,8 @@ type Cluster struct {
 	isExternalService bool
 	lb                *mesh_proto.TrafficRoute_LoadBalancer
 	timeout           *mesh_proto.Timeout_Conf
+	shadow            bool
+	percentage        *wrapperspb.DoubleValue
 }
 
 func (c *Cluster) Service() string                           { return c.service }
@@ -29,6 +32,8 @@ func (c *Cluster) IsExternalService() bool                   { return c.isExtern
 func (c *Cluster) LB() *mesh_proto.TrafficRoute_LoadBalancer { return c.lb }
 func (c *Cluster) Timeout() *mesh_proto.Timeout_Conf         { return c.timeout }
 func (c *Cluster) Hash() string                              { return fmt.Sprintf("%s-%s", c.name, c.tags.String()) }
+func (c *Cluster) Shadow() bool                              { return c.shadow }
+func (c *Cluster) Percentage() *wrapperspb.DoubleValue       { return c.percentage }
 
 func (c *Cluster) SetName(name string) {
 	c.name = name
@@ -108,6 +113,18 @@ func WithLB(lb *mesh_proto.TrafficRoute_LoadBalancer) NewClusterOpt {
 func WithExternalService(isExternalService bool) NewClusterOpt {
 	return newClusterOptFunc(func(cluster *Cluster) {
 		cluster.isExternalService = isExternalService
+	})
+}
+
+func WithShadow(shadow bool) NewClusterOpt {
+	return newClusterOptFunc(func(cluster *Cluster) {
+		cluster.shadow = shadow
+	})
+}
+
+func WithPercentage(percentage *wrapperspb.DoubleValue) NewClusterOpt {
+	return newClusterOptFunc(func(cluster *Cluster) {
+		cluster.percentage = percentage
 	})
 }
 

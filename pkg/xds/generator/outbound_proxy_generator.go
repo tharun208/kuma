@@ -270,7 +270,7 @@ func (_ OutboundProxyGenerator) determineRoutes(proxy *model.Proxy, outbound *ku
 	// If we have same split in many HTTP matches we can use the same cluster with different weight
 	clusterCache := map[string]string{}
 
-	clustersFromSplit := func(splits []*kuma_mesh.TrafficRoute_Split) []envoy_common.Cluster {
+	clustersFromSplit := func(splits []*kuma_mesh.TrafficRoute_Split, mirrorConf *kuma_mesh.TrafficRoute_Mirror) []envoy_common.Cluster {
 		var clusters []envoy_common.Cluster
 		for _, destination := range splits {
 			service := destination.Destination[kuma_mesh.ServiceTag]
@@ -312,6 +312,21 @@ func (_ OutboundProxyGenerator) determineRoutes(proxy *model.Proxy, outbound *ku
 
 			clusters = append(clusters, cluster)
 		}
+		if mirrorConf != nil {
+			service := mirrorConf.Destination[kuma_mesh.ServiceTag]
+			name := service
+			if len(mirrorConf.GetDestination()) > 1 {
+				name = envoy_names.GetSplitClusterName(service, splitCounter.getAndIncrement())
+			}
+			cluster := envoy_common.NewCluster(
+				envoy_common.WithService(service),
+				envoy_common.WithName(name),
+				envoy_common.WithTags(mirrorConf.Destination),
+				envoy_common.WithShadow(true),
+				envoy_common.WithPercentage(mirrorConf.Percentage),
+			)
+			clusters = append(clusters, cluster)
+		}
 		return clusters
 	}
 
@@ -319,14 +334,13 @@ func (_ OutboundProxyGenerator) determineRoutes(proxy *model.Proxy, outbound *ku
 		route := envoy_common.Route{
 			Match:    http.Match,
 			Modify:   http.Modify,
-			Clusters: clustersFromSplit(http.GetSplitWithDestination()),
-			Mirror:   http.GetMirror(),
+			Clusters: clustersFromSplit(http.GetSplitWithDestination(), http.GetMirror()),
 		}
 		routes = append(routes, route)
 	}
 
 	if defaultDestination := route.Spec.GetConf().GetSplitWithDestination(); len(defaultDestination) > 0 {
-		cfs := clustersFromSplit(defaultDestination)
+		cfs := clustersFromSplit(defaultDestination, nil)
 		route := envoy_common.Route{
 			Match:    nil,
 			Clusters: cfs,

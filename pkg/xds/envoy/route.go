@@ -9,7 +9,6 @@ type Route struct {
 	Modify    *mesh_proto.TrafficRoute_Http_Modify
 	RateLimit *mesh_proto.RateLimit
 	Clusters  []Cluster
-	Mirror    *mesh_proto.TrafficRoute_Mirror
 }
 
 func NewRouteFromCluster(cluster Cluster) Route {
@@ -17,7 +16,6 @@ func NewRouteFromCluster(cluster Cluster) Route {
 		Match:    nil,
 		Modify:   nil,
 		Clusters: []Cluster{cluster},
-		Mirror:   nil,
 	}
 }
 

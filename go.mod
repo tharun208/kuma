@@ -16,8 +16,8 @@ require (
 	github.com/go-errors/errors v1.0.2-0.20180813162953-d98b870cc4e0
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/go-kit/kit v0.11.0
-	github.com/go-logr/logr v0.1.0
-	github.com/go-logr/zapr v0.1.1
+	github.com/go-logr/logr v0.4.0
+	github.com/go-logr/zapr v0.4.0
 	github.com/golang-migrate/migrate/v4 v4.14.1
 	github.com/golang/protobuf v1.5.2
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
@@ -30,7 +30,7 @@ require (
 	github.com/lib/pq v1.10.2
 	github.com/miekg/dns v1.1.42
 	github.com/onsi/ginkgo v1.16.4
-	github.com/onsi/gomega v1.13.0
+	github.com/onsi/gomega v1.14.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.11.0
@@ -45,22 +45,22 @@ require (
 	github.com/spiffe/spire v0.12.3
 	github.com/spiffe/spire/proto/spire v0.12.0 // indirect
 	go.uber.org/multierr v1.7.0
-	go.uber.org/zap v1.17.0
+	go.uber.org/zap v1.18.1
 	golang.org/x/net v0.0.0-20210525063256-abc453219eb5
-	golang.org/x/sys v0.0.0-20210603081109-ebe580a85c40
-	golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e
+	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c
+	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac
 	google.golang.org/genproto v0.0.0-20210602131652-f16073e35f0c
 	google.golang.org/grpc v1.38.0
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.4.0
 	helm.sh/helm/v3 v3.3.4
-	k8s.io/api v0.18.14
-	k8s.io/apiextensions-apiserver v0.18.14
-	k8s.io/apimachinery v0.18.14
-	k8s.io/client-go v0.18.14
-	k8s.io/utils v0.0.0-20210709001253-0e1f9d693477
-	sigs.k8s.io/controller-runtime v0.6.4
+	k8s.io/api v0.21.3
+	k8s.io/apiextensions-apiserver v0.21.3
+	k8s.io/apimachinery v0.21.3
+	k8s.io/client-go v0.21.3
+	k8s.io/utils v0.0.0-20210722164352-7f3ee0f31471
+	sigs.k8s.io/controller-runtime v0.9.6
 	sigs.k8s.io/testing_frameworks v0.1.2
 )
 
